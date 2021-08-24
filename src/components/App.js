@@ -5,13 +5,41 @@ import Order from "./Order";
 import sampleFishes from "../sample-fishes";
 import Fish from "./Fish";
 import { thisExpression } from '@babel/types';
-
+import base from "../base";
 
 class App extends React.Component {
     state = {
         fishes: {},
         order: {}
     };
+
+    componentDidMount() {       
+        const { params } = this.props.match;
+        //first reinstate our localStorage
+        const localStorageRef = localStorage.getItem(params.storeId);
+        if(localStorageRef) {           
+            this.setState({ order: JSON.parse(localStorageRef)})
+        }
+
+        this.ref = base.syncState(`${params.storeId}/fishes`, {
+        
+            context:this,
+            state: "fishes"
+        });
+    }
+
+    componentWillUnmount(){
+        base.removeBinding(this.ref);
+    }
+    
+    componentDidUpdate(){
+        console.log(this.state.order);
+        localStorage.setItem(
+            this.props.match.params.storeId,
+            JSON.stringify(this.state.order)
+        );
+    }
+
 
     addFish = fish => {
 
